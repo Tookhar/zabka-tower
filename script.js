@@ -88,12 +88,11 @@ function updateFrog() {
     }
 
 if (frog.y > window.innerHeight + 100) {
-    frog.vx = 0;
-    frog.vy = 0;
     frog.y = window.innerHeight / 2;
     frog.x = window.innerWidth / 2;
-    platforms.forEach(p => p.y += 300); // jakby leciał dalej w dół
-    // Gra nie kończy się – można kontynuować!
+    frog.vy = jumpStrength; // skok po "odrodzeniu"
+    frog.vx = 0;
+    platforms.forEach(p => p.y += 300); // tło się przesuwa
 }
 }
 
