@@ -1,4 +1,3 @@
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -6,7 +5,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let gravity = 0.5;
-let jumpStrength = -15; // mocniejszy skok
+let jumpStrength = -15;
 let platformWidth = 80;
 let platformHeight = 10;
 
@@ -42,11 +41,21 @@ function createPlatform(x, y, isGround = false) {
 }
 
 function generateInitialPlatforms() {
-    // Grunt rozciągający się na całą szerokość
+    platforms = [];
+
+    // Platforma startowa - zawsze pod żabą
+    const centerX = canvas.width / 2 - platformWidth / 2;
+    const centerY = canvas.height / 2 + 50;
+    platforms.push(createPlatform(centerX, centerY, false));
+
+    // Grunt (na dole ekranu)
     platforms.push(createPlatform(0, canvas.height - 20, true));
 
+    // Pozostałe platformy
     for (let i = 1; i <= 10; i++) {
-        platforms.push(createPlatform(Math.random() * (canvas.width - platformWidth), canvas.height - i * 100));
+        const randomX = Math.random() * (canvas.width - platformWidth);
+        const randomY = canvas.height - i * 100;
+        platforms.push(createPlatform(randomX, randomY));
     }
 }
 
@@ -58,6 +67,15 @@ function drawPlatforms() {
 }
 
 function updateFrog() {
+    // Klawiatura
+    if (keys.left) {
+        frog.vx = -5;
+    } else if (keys.right) {
+        frog.vx = 5;
+    } else {
+        frog.vx = 0;
+    }
+
     frog.vy += gravity;
     frog.y += frog.vy;
     frog.x += frog.vx;
@@ -87,10 +105,29 @@ function updateFrog() {
         score += Math.floor(dy / 10);
     }
 
-    if (frog.y > canvas.height + 100) {
-        alert("Koniec gry! Twój wynik: " + score);
-        document.location.reload();
+    if (frog.y > window.innerHeight + 100) {
+        frog.vx = 0;
+        frog.vy = 0;
+        frog.x = window.innerWidth / 2;
+        frog.y = window.innerHeight / 2;
+
+        // Zresetuj platformy
+        generateInitialPlatforms();
+
+        // Nie resetujemy punktów – można grać dalej
     }
+
+    // Usuń platformy, które wypadły poza ekran
+    platforms = platforms.filter(p => p.y < canvas.height + 100);
+
+    // Dodawaj nowe platformy powyżej, jeśli potrzeba
+    while (platforms.length < 20) {
+        const highestPlatformY = platforms.reduce((minY, p) => Math.min(minY, p.y), canvas.height);
+        const newPlatformY = highestPlatformY - 100;
+        const newPlatformX = Math.random() * (canvas.width - platformWidth);
+        platforms.push(createPlatform(newPlatformX, newPlatformY));
+    }
+
 }
 
 function drawScore() {
@@ -111,6 +148,7 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+// 👉 Obsługa dotyku (zostaje)
 canvas.addEventListener("touchstart", (e) => {
     const x = e.touches[0].clientX;
     if (x < canvas.width / 2) {
@@ -125,6 +163,28 @@ canvas.addEventListener("touchstart", (e) => {
 
 canvas.addEventListener("touchend", () => {
     frog.vx = 0;
+});
+
+// 🎮 Obsługa klawiszy A i D
+window.addEventListener("keydown", (e) => {
+    if (e.key === "a" || e.key === "A") {
+        keys.left = true;
+    }
+    if (e.key === "d" || e.key === "D") {
+        keys.right = true;
+    }
+    if ((e.key === "w" || e.key === "W" || e.key === " " || e.key === "ArrowUp") && frog.onPlatform) {
+        frog.vy = jumpStrength;
+    }
+});
+
+window.addEventListener("keyup", (e) => {
+    if (e.key === "a" || e.key === "A") {
+        keys.left = false;
+    }
+    if (e.key === "d" || e.key === "D") {
+        keys.right = false;
+    }
 });
 
 generateInitialPlatforms();
