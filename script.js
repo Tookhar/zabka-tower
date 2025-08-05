@@ -120,16 +120,20 @@ generateInitialPlatforms();
 // Nie resetujemy punktów – można grać dalej
 }
 
-// Usuń platformy, które wypadły poza ekran
-platforms = platforms.filter(p => p.y < canvas.height + 100);
+// Usuń platformy, które spadły poza ekran
+platforms = platforms.filter(p => p.y < canvas.height + 200);
 
-// Dodawaj nowe platformy powyżej, jeśli potrzeba
-while (platforms.length < 20) {
-const highestPlatformY = platforms.reduce((minY, p) => Math.min(minY, p.y), canvas.height);
-const newPlatformY = highestPlatformY - 100;
+// Znajdź najwyżej położoną platformę
+let highestPlatformY = platforms.reduce((minY, p) => Math.min(minY, p.y), canvas.height);
+
+// Jeśli najwyższa platforma jest za nisko, dodaj nowe wyżej
+while (highestPlatformY > 0) {
 const newPlatformX = Math.random() * (canvas.width - platformWidth);
+const newPlatformY = highestPlatformY - 100;
 platforms.push(createPlatform(newPlatformX, newPlatformY));
+highestPlatformY = newPlatformY;
 }
+
 
 }
 
