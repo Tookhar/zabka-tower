@@ -87,10 +87,14 @@ function updateFrog() {
         score += Math.floor(dy / 10);
     }
 
-    if (frog.y > canvas.height + 100) {
-        alert("Koniec gry! Twój wynik: " + score);
-        document.location.reload();
-    }
+if (frog.y > window.innerHeight + 100) {
+    frog.vx = 0;
+    frog.vy = 0;
+    frog.y = window.innerHeight / 2;
+    frog.x = window.innerWidth / 2;
+    platforms.forEach(p => p.y += 300); // jakby leciał dalej w dół
+    // Gra nie kończy się – można kontynuować!
+}
 }
 
 function drawScore() {
